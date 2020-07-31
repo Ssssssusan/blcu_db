@@ -28,3 +28,10 @@ CREATE TABLE `acquaintance` (
 ```
 3. 生成测试数据  
 ![data](acquaintance.jpg)
+
+4. 表查询
+找出只在一个朋友类别里的人，代码如下：
+```sql
+select * from acquaintance where friend1 in (select friend1 from acquaintance group by friend1 having count(*)=1);
+select * from acquaintance where friend2 in (select friend2 from acquaintance group by friend2 having count(*)=1);
+```
