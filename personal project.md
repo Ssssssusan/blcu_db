@@ -25,7 +25,7 @@ SQL 优化一般步骤为：
 - 分析 SQL 执行过程
 - 优化
 
-1.使用 show status 查询数据库运行状况
+1.使用 show status 查询数据库运行状况  
 ```sql
 //显示数据库运行状态
 SHOW STATUS
@@ -48,7 +48,7 @@ SHOW STATUS LIKE 'slow_queries'
 SHOW VARIABLES LIKE 'long_query_time'
 ```
 
-3.分析 SQL 执行过程
+3.分析 SQL 执行过程  
 1. 使用 explain  
     ```
     explain [要分析的sql]
@@ -57,7 +57,7 @@ SHOW VARIABLES LIKE 'long_query_time'
     ```
     show profile for query [query id]
     ```
-3. 通过 trace 分析优化器如何选择执行计划 
+3. 通过 trace 分析优化器如何选择执行计划  
 
 ---
 
@@ -67,9 +67,9 @@ SHOW VARIABLES LIKE 'long_query_time'
 - 优化查询语句
 
 ### 规范数据库或数据表结构
-1. 尽量不使用 TEXT 数据类型 
+1. 尽量不使用 TEXT 数据类型  
     除非处理很大的数据，否则不要使用 TEXT，TEXT 不易于查询且速度慢，用的不好还会浪费大量的空间。一般 VARCHAR 可以更好的处理数据。
-2. 选择最有效率的表名顺序 
+2. 选择最有效率的表名顺序  
     ORACLE 的解析器按照从右到左的顺序处理 FROM 子句中的表名，FROM 子句中写在最后的表将被最先处理。在 FROM 子句中包含多个表的情况下,须选择记录条数最少的表作为基础表，如果有3个以上的表连接查询, 那就需要选择交叉表作为基础表。
 
 ### 优化查询语句
@@ -79,23 +79,23 @@ SHOW VARIABLES LIKE 'long_query_time'
     select * from todo
     select * From todo
     ```
-2. 优化过于复杂的 SQL 语句
+2. 优化过于复杂的 SQL 语句  
     一般，将一个 Select 语句的结果作为子集，然后从该子集中再进行查询，这种1层嵌套较为常见。超过3层嵌套，查询优化器就很容易给出错误的执行计划。另外，执行计划可以被重用，越简单的 SQL 语句被重用的可能性越高。而复杂的 SQL 语句只要有一个字符发生变化就要重新解析，导致数据库效率低下。
 
-3. 尽量不使用 SELECT *  
+3. 尽量不使用 SELECT *   
     利用索引，而非全文扫描。
     ```sql
     SELECT todo.tid, todo.content
     FROM todo 
     WHERE todo.uid ="'.$_SESSION['userid'].'"
     ```
-4. 使用 LIKE 关键字的查询
+4. 使用 LIKE 关键字的查询  
     进行模糊查询时，可能应用以下语句。关键词“%$content%”，由于用到了“%”，因此该查询为全表扫描，除非必要，否则不要在关键词前加%。
     ```sql
     SELECT * FROM todo WHERE todo.content LIKE '%$content%'’
     ```
 
-5. 使用 Order by 语句的查询
+5. 使用 Order by 语句的查询  
     任何在 Order by 语句的非索引项或者有计算表达式都将降低查询速度,如不必要，应避免使用,可尝试以 WHERE 替代。
     ```sql
     SELECT todo.tid, todo.content, todo.ddl, todo.importance, todo.status, list.list_name 
@@ -106,7 +106,7 @@ SHOW VARIABLES LIKE 'long_query_time'
     ORDER BY todo.status asc, todo.ddl asc'
     ```
 
-6. 使用 OR 关键字的查询
+6. 使用 OR 关键字的查询  
     查询语句的查询条件中只有 OR 关键字，且 OR 前后的两个条件中的列都是索引时，索引才会生效，否则，索引不生效。通常情况下, 用 UNION 替换 OR 将会起到较好的效果, 以上规则只针对多个索引列有效。
     ```sql    
     //高效: 
@@ -123,20 +123,20 @@ SHOW VARIABLES LIKE 'long_query_time'
     WHERE LOC_ID = 10 OR REGION = “MELBOURNE” 
     ```
 
-6. 用 WHERE 替换 HAVING 
+6. 用 WHERE 替换 HAVING   
     避免使用 HAVING 子句, HAVING 会在检索出所有记录之后才对结果集进行过滤。这个处理需要排序、总计等操作。如果能通过 WHERE 子句限制记录数目,就能减少开销。
 
-7. 用 EXISTS 替换 IN 
+7. 用 EXISTS 替换 IN   
     在许多基于基础表的查询中,为了满足一个条件,往往需要对另一个表进行联接，在这种情况下, 使用 EXISTS 将提高查询的效率。在子查询中,NOT IN 子句将执行一个内部的排序和合并，是低效的。
 
-8. 减少对表的查询，通过内部函数提高效率 
+8. 减少对表的查询，通过内部函数提高效率   
     在含有子查询的 SQL 语句中,要注意减少对表的查询。可以通过内部函数提高效率，甚至可以整合简单、无关联的数据库访问。 
     ```sql    
     SELECT  TAB_NAME FROM TABLES WHERE (TAB_NAME,DB_VER) = ( SELECT 
     TAB_NAME,DB_VER FROM  TAB_COLUMNS  WHERE  VERSION = 604) 
     ```
 
-9. 使用表的别名
+9. 使用表的别名  
     当语句中连接多个表时, 使用表的别名并把别名前缀于每一列上，减少解析的时间以及由歧义引起的语法错误。
     ```sql
     SELECT todo.tid, todo.content, list.list_name 
@@ -144,7 +144,7 @@ SHOW VARIABLES LIKE 'long_query_time'
     LEFT JOIN list 
     ON todo.lid=list.lid 
     ```
-10. 避免使用 IS NULL 与 IS NOT NULL
+10. 避免使用 IS NULL 与 IS NOT NULL  
     使用 IS NULL 与 IS NOT NULL 时，不允许使用索引。
     ```sql    
     //低效: (索引失效) 
