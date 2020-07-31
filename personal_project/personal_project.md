@@ -154,7 +154,7 @@ SHOW VARIABLES LIKE 'long_query_time'
     ``` 
 11. 如果已知只有一个查询结果，使用limit 1
     添加limit 1后，查找到相应的记录时便不会继续查找下去，效率会大大提高。
-    ```
+    ```sql
     SELECT * FROM user WHERE email = '{$email}' limit 1
     ```
 
