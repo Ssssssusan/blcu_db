@@ -152,6 +152,11 @@ SHOW VARIABLES LIKE 'long_query_time'
     //高效: (索引有效) 
     SELECT … FROM  …  WHERE  A >=0;
     ``` 
+11. 如果已知只有一个查询结果，使用limit 1
+    添加limit 1后，查找到相应的记录时便不会继续查找下去，效率会大大提高。
+    ```
+    SELECT * FROM user WHERE email = '{$email}' limit 1
+    ```
 
 ## 心得体会
 经过这一主题的自学后，反思本组项目开发流程及成果，我发现了很多现有代码中急待优化或仍有改进空间的地方。很多方面是非常细节的，也是我原来完全意识不到的内容。
